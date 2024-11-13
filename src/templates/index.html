@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>语音助手对话记录</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .conversation {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .user-input {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+        .bot-response {
+            color: #4CAF50;
+        }
+        .timestamp {
+            color: #999;
+            font-size: 0.8em;
+            text-align: right;
+        }
+        #conversation-container {
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        #search-input {
+            width: 80%;
+            max-width: 500px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .load-more {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .load-more button {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .load-more button:hover {
+            background-color: #1976D2;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <h1>语音助手对话记录</h1>
+    
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="搜索对话内容...">
+    </div>
+    
+    <div id="conversation-container"></div>
+    
+    <div class="load-more">
+        <button id="load-more-btn">加载更多</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const container = document.getElementById('conversation-container');
+        const searchInput = document.getElementById('search-input');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        let currentPage = 1;
+        let isSearching = false;
+
+        // 高亮搜索结果
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // 添加新对话到页面
+        function addConversation(data, highlight = '') {
+            const div = document.createElement('div');
+            div.className = 'conversation';
+            div.innerHTML = `
+                <div class="user-input">用户: ${highlightText(data.user_input, highlight)}</div>
+                <div class="bot-response">助手: ${highlightText(data.bot_response, highlight)}</div>
+                <div class="timestamp">${data.timestamp}</div>
+            `;
+            container.appendChild(div);
+        }
+
+        // 清空对话容器
+        function clearConversations() {
+            container.innerHTML = '';
+        }
+
+        // 加载对话历史
+        function loadConversations(page = 1) {
+            fetch(`/api/conversations?page=${page}`)
+                .then(response => response.json())
+                .then(conversations => {
+                    if (page === 1) clearConversations();
+                    conversations.forEach(conv => addConversation(conv));
+                    currentPage = page;
+                });
+        }
+
+        // 搜索对话
+        function searchConversations(query) {
+            if (!query) {
+                isSearching = false;
+                loadConversations(1);
+                return;
+            }
+            
+            isSearching = true;
+            fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(conversations => {
+                    clearConversations();
+                    conversations.forEach(conv => addConversation(conv, query));
+                });
+        }
+
+        // 接收新对话
+        socket.on('new_conversation', function(data) {
+            if (!isSearching) {
+                addConversation(data);
+            }
+        });
+
+        // 搜索输入处理
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchConversations(e.target.value);
+            }, 300);
+        });
+
+        // 加载更多按钮
+        loadMoreBtn.addEventListener('click', () => {
+            if (!isSearching) {
+                loadConversations(currentPage + 1);
+            }
+        });
+
+        // 初始加载
+        loadConversations(1);
+    </script>
+</body>
+</html> 
