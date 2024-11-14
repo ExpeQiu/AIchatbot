@@ -24,4 +24,13 @@ flask-socketio>=5.1.1
 eventlet>=0.33.0
 
 # 数据库相关
-SQLAlchemy>=1.4.0 
+SQLAlchemy>=1.4.0
+
+# 显示相关
+Pillow>=8.2.0  # Python图像处理
+pygame>=2.0.1  # 图形界面
+RPi.GPIO>=0.7.0  # GPIO控制
+spidev>=3.5  # SPI接口支持
+smbus2>=0.4.1  # I2C接口支持
+luma.oled>=3.8.1  # OLED显示支持
+luma.lcd>=2.8.0  # LCD显示支持 

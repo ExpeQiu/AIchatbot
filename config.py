@@ -36,3 +36,15 @@ AUDIO_CACHE_SIZE = 100  # 音频缓存数量限制
 API_CACHE_TTL = 3600  # API缓存过期时间（秒）
 AUDIO_CHUNK_OPTIMIZE = 4096  # 优化后的音频块大小
 AUDIO_FORMAT = pyaudio.paFloat32  # 优化后的音频格式
+
+# 显示配置
+DISPLAY_WIDTH = 480  # 显示屏宽度
+DISPLAY_HEIGHT = 320  # 显示屏高度
+FONT_PATH = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"  # 中文字体路径
+MAX_DISPLAY_MESSAGES = 5  # 显示最近的消息数量
+
+# 显示颜色配置
+BACKGROUND_COLOR = (0, 0, 0)  # 黑色背景
+TEXT_COLOR = (255, 255, 255)  # 白色文本
+USER_TEXT_COLOR = (100, 149, 237)  # 用户文本颜色
+BOT_TEXT_COLOR = (50, 205, 50)  # 机器人文本颜色
