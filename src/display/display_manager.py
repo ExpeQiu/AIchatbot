@@ -4,6 +4,8 @@ import threading
 from queue import Queue
 from typing import Dict, List
 from config import *
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 class DisplayManager:
     def __init__(self):
@@ -154,3 +156,15 @@ class DisplayManager:
         """清理资源"""
         self.running = False
         pygame.quit() 
+
+class AsyncDisplay(DisplayManager):
+    def __init__(self):
+        self.executor = ThreadPoolExecutor(max_workers=1)
+        
+    async def update_conversation_async(self, message: str, is_user: bool):
+        await asyncio.get_event_loop().run_in_executor(
+            self.executor,
+            self.update_conversation,
+            message,
+            is_user
+        ) 
